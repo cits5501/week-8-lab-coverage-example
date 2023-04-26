@@ -1,0 +1,72 @@
+<project name="palindrome" xmlns:jacoco="antlib:org.jacoco.ant">
+
+    <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+        <!-- <classpath path="./lib/jacocoant.jar"/> -->
+        <classpath>
+          <pathelement location="./lib/jacocoant.jar"/>
+        </classpath>
+    </taskdef>
+
+    <path id="classpath.test">
+       <fileset dir="./lib" includes="*.jar" />
+    </path>
+
+    <target name="init" description="make build dir">
+      <mkdir dir="bin" />
+    </target>
+
+
+    <target name="compile" depends="init" description="compile the source ">
+        <javac srcdir="src" destdir="bin" includeantruntime="true" debug="true" />
+    </target>
+
+    <target name="compileTest" depends="compile" description="compile jUnit Test cases ">
+        <javac srcdir="test" destdir="bin" includeantruntime="true" debug="true">
+            <classpath refid="classpath.test"/>
+        </javac>
+    </target>
+
+    <target name="test" depends="compileTest">
+      <mkdir dir="report" />
+      <jacoco:coverage destfile="./report/jacoco.exec">
+        <junit printsummary="on" haltonfailure="yes" fork="true">
+            <classpath>
+              <path refid="classpath.test"/>
+              <pathelement location="./bin"/>
+            </classpath>
+            <formatter type="brief" usefile="false" />
+            <batchtest>
+                <fileset dir="./test" includes="**/*Test.java" />
+            </batchtest>
+        </junit>
+      </jacoco:coverage>
+    </target>
+
+    <target name="report" depends="test">
+      <jacoco:report>
+
+          <!-- jacoco needs the execution trace -->
+          <executiondata>
+                  <file file="./report/jacoco.exec" />
+          </executiondata>
+
+          <!-- and the class files and source files ... -->
+          <structure name="JaCoCo example">
+                  <classfiles>
+                          <fileset dir="./bin" />
+                  </classfiles>
+                  <sourcefiles encoding="UTF-8">
+                          <fileset dir="./src" />
+                  </sourcefiles>
+          </structure>
+
+          <!-- produce reports in different formats. -->
+          <html destdir="./report/" />
+          <csv destfile="./report/report.csv" />
+          <xml destfile="./report/report.xml" />
+      </jacoco:report>
+    </target>
+
+
+
+</project>
